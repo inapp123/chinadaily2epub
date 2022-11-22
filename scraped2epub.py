@@ -31,7 +31,7 @@ book.add_item(chapter_Disclaimer)
 book.toc = [epub.Link("disclaimer.xhtml" ,"Disclaimer", "disclaimer")]
 
 # basic spine
-book.spine = ['nav',"chapter_Disclaimer"]
+book.spine = ['nav',chapter_Disclaimer]
 
 # add chapters
 for filename in os.listdir("data"):

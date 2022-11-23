@@ -2,10 +2,30 @@ from ebooklib import epub
 import os
 from bs4 import BeautifulSoup
 
+
+OPTIMIZE_IMAGE = True
+MAXIMAL_IMAGE_WIDTH = 800
+JPEG_QUALITY = 70
+
+def calc_ideal_size(width, height):
+    if width > MAXIMAL_IMAGE_WIDTH:
+        ratio = MAXIMAL_IMAGE_WIDTH / width
+        width = MAXIMAL_IMAGE_WIDTH
+        height = height * ratio
+    if height > MAXIMAL_IMAGE_WIDTH:
+        ratio = MAXIMAL_IMAGE_WIDTH / height
+        height = MAXIMAL_IMAGE_WIDTH
+        width = width * ratio
+    return int(width), int(height)
+
+if OPTIMIZE_IMAGE:
+    import cv2
+
+
 book = epub.EpubBook()
 
 # set metadata
-book.set_identifier('shirogane114514')
+book.set_identifier('chinadaily_scraper')
 book.set_title('China Daily')
 book.set_language('en')
 
@@ -48,7 +68,13 @@ for filename in os.listdir("data"):
     if soup.find(name="img") != None:
         for img in soup.find_all(name="img"):
             imgsrc = img.get('src')
-            image_content = open(os.path.join("data",imgsrc), 'rb').read()
+            if OPTIMIZE_IMAGE:
+                imgmat = cv2.imread(os.path.join("data",imgsrc))
+                dstwidth,dstheight = calc_ideal_size(imgmat.shape[1],imgmat.shape[0])
+                imgmat = cv2.resize(imgmat,(dstwidth,dstheight))
+                image_content = cv2.imencode('.jpg', imgmat, [cv2.IMWRITE_JPEG_QUALITY, JPEG_QUALITY])[1].tobytes()
+            else:
+                image_content = open(os.path.join("data",imgsrc), 'rb').read()
             book.add_item(epub.EpubItem(uid=imgsrc.split("\\")[1],file_name=imgsrc, media_type='image/jpeg', content=image_content))
     book.add_item(chapter)
     book.toc.append(epub.Link(filename + ".xhtml" ,title, filename))

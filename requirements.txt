@@ -1,3 +1,4 @@
 EbookLib
 beautifulsoup4
 urllib3
+opencv-python

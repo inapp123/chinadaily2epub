@@ -67,6 +67,8 @@ for index in indexes:
             for cont in content.children:
                 if cont.name == "figure":
                     img = cont.find('img')
+                    if img == None:
+                        continue
                     imgsrc = img.get('src')
                     with open(os.path.join("data","img",imgsrc[imgsrc.find("images/") + 7:]).replace("/","_"), 'wb') as fi:
                         fi.write(http.request('GET', "http:" + imgsrc).data)
